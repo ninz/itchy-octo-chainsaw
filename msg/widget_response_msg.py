@@ -9,12 +9,10 @@ class WidgetResponseMsgError(BaseMsgError):
 
 class WidgetResponseMsg(BaseMsg):
 
-    def __init__(self, msg, sqs, **kwargs):
+    def __init__(self, msg, q, **kwargs):
         self.msg = msg
-        self.sqs = sqs
-
+        self.q = q
         self.id = self.msg.id
-        self.queue = self.msg.queue
         self.body = BaseMsg().get_body(self.msg)
         self.widget_id = self.body.get('WidgetId', None)
         self.widget_maker_url = kwargs.get('widget_maker_url',

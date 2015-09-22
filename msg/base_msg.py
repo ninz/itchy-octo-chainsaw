@@ -10,7 +10,7 @@ class BaseMsg():
 
     @staticmethod
     def get_body(msg):
-        return json.loads(base64.b64decode(msg.get_body()))
+        return json.loads(base64.b64decode(msg.body))
 
     @staticmethod
     def get_std_response(obj):

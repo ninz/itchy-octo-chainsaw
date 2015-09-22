@@ -1,5 +1,8 @@
 import argparse
-import pyrax.queues as pq
+import requests
+import sys
+import time
+import uuid
 from msg import Q, WidgetResponseMsg
 
 def parse_args():
@@ -17,15 +20,20 @@ def parse_args():
 
 
 def main():
+    args = parse_args()
+
+    client_id = str(uuid.uuid4())
+    q = Q()
+    q.connect(client_id)
+
     while True:
-    	q = Q()
 
-    	for _msg in Q.get_msgs()
+        for _msg in q.get_msgs(args.request_queue):
 
-    		msg = WidgetResponseMsg(_msg, q)
-    		print("Received Msg; msg={0.id}, body={0.body}".format(msg))
+            msg = WidgetResponseMsg(_msg, q)
+            print("Received Msg; msg={0.id}, body={0.body}".format(msg))
 
-    		           # Create response message.
+            # Create response message.
             msg_resp = msg.get_std_response(msg)
 
             try:
@@ -41,11 +49,11 @@ def main():
                     print("Widget maker failed to make widget; msg={0.id} "
                           "status_code={1.status_code}".format(msg,
                                                                e.response))
-                    sqs.manage_failed_request(args.request_queue, _msg)
+                    q.manage_failed_request(args.request_queue, _msg)
                 continue
             except requests.exceptions.ConnectionError:
                 print("Widget maker is down; msg={0.id}".format(msg))
-                sqs.manage_failed_request(args.request_queue, _msg)
+                q.manage_failed_request(args.request_queue, _msg)
                 continue
             else:
                 print("Widget created; msg={0.id}, body={1.content}"
@@ -53,12 +61,12 @@ def main():
                 msg_resp.update({"Status": "OK"})
 
             # Send Response Message.
-            sqs.write_msg(args.response_queue, msg_resp)
+            q.write_msg(args.response_queue, msg_resp)
 
             # Delete Request Message.
-            _msg.delete()
+            q.delete_msg(args.request_queue, _msg)
 
-	    time.sleep(float(args.sleep))
+        time.sleep(float(args.sleep))
 
 
 if __name__ == "__main__":
