@@ -21,7 +21,7 @@ def main():
 
     q = Q()
     q.connect(client_id)
-    
+
     msg_resq = {'WidgetId': args.widget_id}
     q.write_msg(args.request_queue, msg_resq)
 

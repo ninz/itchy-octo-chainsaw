@@ -5,6 +5,7 @@ import time
 import uuid
 from msg import Q, WidgetResponseMsg
 
+
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--openstack-request-queue', dest='request_queue',
@@ -18,7 +19,6 @@ def parse_args():
     return parser.parse_args()
 
 
-
 def main():
     args = parse_args()
 
@@ -28,7 +28,8 @@ def main():
 
     while True:
 
-        for _msg in q.get_msgs(args.request_queue):
+        (claim_id, messages) = q.get_msgs(args.request_queue)
+        for _msg in messages:
 
             msg = WidgetResponseMsg(_msg, q)
             print("Received Msg; msg={0.id}, body={0.body}".format(msg))
@@ -44,7 +45,8 @@ def main():
                     print("Widget maker rejected widget; msg={0.id}, "
                           "status_code={1.status_code}".format(msg,
                                                                e.response))
-                    msg.delete()
+                    # Delete Request Message.
+                    q.delete_msg(args.request_queue, _msg, claim_id)
                 else:
                     print("Widget maker failed to make widget; msg={0.id} "
                           "status_code={1.status_code}".format(msg,
@@ -64,7 +66,7 @@ def main():
             q.write_msg(args.response_queue, msg_resp)
 
             # Delete Request Message.
-            q.delete_msg(args.request_queue, _msg)
+            q.delete_msg(args.request_queue, _msg, claim_id)
 
         time.sleep(float(args.sleep))
 
