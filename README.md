@@ -14,4 +14,8 @@ This is a proof of concept which consists of
 
 ## Setup
 
+    virtualenv venv
+    source venv/bin/activate
+    pip install -r requirements.txt
+    
 Set up pyrax to use [keyring authentication](https://github.com/rackspace/pyrax/blob/master/docs/getting_started.md#authenticating). See https://github.com/jaraco/keyring for more info.
