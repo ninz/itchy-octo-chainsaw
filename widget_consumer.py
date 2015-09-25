@@ -51,11 +51,11 @@ def main():
                     print("Widget maker failed to make widget; msg={0.id} "
                           "status_code={1.status_code}".format(msg,
                                                                e.response))
-                    q.manage_failed_request(args.request_queue, _msg)
+                    q.manage_failed_request(args.request_queue, _msg, claim_id)
                 continue
             except requests.exceptions.ConnectionError:
                 print("Widget maker is down; msg={0.id}".format(msg))
-                q.manage_failed_request(args.request_queue, _msg)
+                q.manage_failed_request(args.request_queue, _msg, claim_id)
                 continue
             else:
                 print("Widget created; msg={0.id}, body={1.content}"
